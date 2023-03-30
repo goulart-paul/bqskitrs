@@ -1,0 +1,35 @@
+name: Build Wheels
+
+on: 
+  workflow_dispatch:
+  # release:
+  #   types: [published]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  linux:
+    name: Manylinux Wheel Build
+    
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Repo
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+      
+      - name: Build Manylinux Wheels
+        run: >
+          docker run -e OPENBLAS_ARGS="DYNAMIC_ARCH=1" --rm -v $(pwd):/io
+          edyounis/bqskitrs-manylinux:1.1 build  --release
+          --features=openblas --compatibility=manylinux2014
+      
+      # - name: Upload Wheel Artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: linux-wheels
+      #     path: target/wheels
+
+  
